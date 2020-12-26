@@ -3,6 +3,8 @@ package com.challenge.dijsktra.app;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -88,7 +90,7 @@ public class SpringBootChallengeDijsktraApplication {
 			List<Node> cityNodes = new ArrayList<Node>();
 
 			for (City cityN : repository.findAll()) {
-				Node node = new Node(cityN.getName());
+				Node node = new Node(cityN);
 				cityNodes.add(node);
 				log.info(cityN.toString() + " Added to City Nodes");
 			}
@@ -97,13 +99,13 @@ public class SpringBootChallengeDijsktraApplication {
 			Graph graph = new Graph();
 
 			for (Node node : cityNodes) {
-				City origin = repository.findByName(node.getName());
+				City origin = node.getCity();
 				// Searching for itineraries whose origin node is this city
 				List<Itinerary> cityItineraries = itRepository.findByOrigin(origin);
 				for (Itinerary itinerary : cityItineraries) {
 
 					Optional<Node> opDestinationNode = cityNodes.stream()
-							.filter(p -> p.getName().equals(itinerary.getDestination().getName())).findFirst();
+							.filter(p -> p.getCity().getName().equals(itinerary.getDestination().getName())).findFirst();
 
 					try {
 
@@ -113,10 +115,9 @@ public class SpringBootChallengeDijsktraApplication {
 						Node destinationNode = opDestinationNode.get();
 						Duration duration = Duration.between(itinerary.getDeparture(), itinerary.getArrival());
 						Integer distance = (int) duration.getSeconds();
-						log.info("Duration between %s and %s  is  %s seconds.%n", origin.getName(),
-								itinerary.getDestination().getName(), distance);
+						log.info("Duration between " + origin.getName() + " and " + itinerary.getDestination().getName() + " is " + distance +" seconds.");
 
-						node.addDestination(destinationNode, distance);
+						node.addDestination(destinationNode, distance, itinerary );
 
 					} catch (NoSuchElementException ex) {
 						log.info("destination node not found in cityNodes");
@@ -131,41 +132,79 @@ public class SpringBootChallengeDijsktraApplication {
 			Graph graphfromMadrid = Dijkstra.calculateShortestPathFromSource(graph, cityNodes.get(0));
 
 			for (Node node : graphfromMadrid.getNodes()) {
-				switch (node.getName()) {
+				switch (node.getCity().getName()) {
 				case "Berlin":
-					log.info("Shortest Path from " + cityNodes.get(0).getName() + " to Berlin: ");
+					log.info("Shortest Path from " + cityNodes.get(0).getCity().getName() + " to Berlin: ");
 					node.getShortestPath().forEach(cityL -> {
-						log.info(cityL.getName());
+						log.info(cityL.getCity().getName());
 					});
+					
+								
 
 					break;
 				case "Tokyo":
-					log.info("Shortest Path from " + cityNodes.get(0).getName() + " to Tokyo: ");
+					/*log.info("Shortest Path from " + cityNodes.get(0).getCity().getName() + " to Tokyo: ");
 					node.getShortestPath().forEach(cityL -> {
-						log.info(cityL.getName());
+						log.info(cityL.getCity().getName());
 					});
+					*/
+					City originCity = null;
+					City destinationCity = null;
+					for (int i = 0; i <= node.getShortestPath().size()-1; i++) {
 
+						originCity = node.getShortestPath().get(i).getCity();
+						
+						if (node.getShortestPath().size() == i+1) {
+							destinationCity = repository.findByName("Tokyo");	
+						}else {
+							destinationCity = node.getShortestPath().get(i+1).getCity();
+													
+						}
+						Itinerary itinerary = itRepository.findByOriginAndDestination(originCity,destinationCity);
+						log.info(originCity.getName() + " to " + destinationCity.getName() + " Itinerary: " + itinerary.toString() );
+												
+					}
+					
+					
+					
+					/*City originCity = null;
+					City destinationCity = null;
+					for (Node nodeP : node.getShortestPath()) {
+
+						Iterator<Node> it = node.getShortestPath().iterator();
+						
+						originCity = nodeP.getCity();
+						if (it.hasNext()) {
+							destinationCity = it.next().getCity();
+						}else {
+							destinationCity = repository.findByName("Tokyo");							
+						}
+						Itinerary itinerary = itRepository.findByOriginAndDestination(originCity,destinationCity);
+						log.info(originCity.getName() + " to " + destinationCity.getName() + " Itinerary: " + itinerary.toString() );
+												
+					}*/
+					
 					break;
 				
 				case "New York":
-					log.info("Shortest Path from " + cityNodes.get(0).getName() + " to New York: ");
+					log.info("Shortest Path from " + cityNodes.get(0).getCity().getName() + " to New York: ");
 					node.getShortestPath().forEach(cityL -> {
-						log.info(cityL.getName());
+						log.info(cityL.getCity().getName());
 					});
 	
 					break;
 				case "Londres":
-					log.info("Shortest Path from " + cityNodes.get(0).getName() + " to Londres: ");
+					log.info("Shortest Path from " + cityNodes.get(0).getCity().getName() + " to Londres: ");
 					node.getShortestPath().forEach(cityL -> {
-						log.info(cityL.getName());
+						log.info(cityL.getCity().getName());
 					});
 	
 					break;	
 				
 				case "Paris":
-					log.info("Shortest Path from " + cityNodes.get(0).getName() + " to Paris: ");
+					log.info("Shortest Path from " + cityNodes.get(0).getCity().getName() + " to Paris: ");
 					node.getShortestPath().forEach(cityL -> {
-						log.info(cityL.getName());
+						log.info(cityL.getCity().getName());
 					});
 	
 					break;	

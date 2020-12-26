@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 
 
 public class DijkstraAlgorithmLongRunningUnitTest {
-
+/*
     @Test
     public void whenDijkstra_HappyPathShortestTime() {
-
+    		
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
         Node nodeC = new Node("C");
@@ -161,7 +161,7 @@ public class DijkstraAlgorithmLongRunningUnitTest {
             }
         }
     }
-
+*/
     @Test
     public void whenZeroDistance() {
 
@@ -173,7 +173,7 @@ public class DijkstraAlgorithmLongRunningUnitTest {
         
                
     }
-
+/*
     @Test
     public void whenDijkstra_HappyPathConnections() {
 
@@ -245,7 +245,7 @@ public class DijkstraAlgorithmLongRunningUnitTest {
                 break;
             }
         }
-    }
+    }*/
 
 
     
