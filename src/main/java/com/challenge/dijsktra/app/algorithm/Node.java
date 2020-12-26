@@ -6,14 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.challenge.dijsktra.app.City;
-import com.challenge.dijsktra.app.Itinerary;
+import com.challenge.dijsktra.app.model.City;
+import com.challenge.dijsktra.app.model.Itinerary;
 
 public class Node {
 
     private City  city;
-
-    private List<Itinerary>  itinerariesFromCity = new LinkedList<>();
     
     private LinkedList<Node> shortestPath = new LinkedList<>();
 
@@ -25,11 +23,10 @@ public class Node {
         this.setCity(city);
     }
 
-    public void addDestination(Node destination, int distance, Itinerary itinerary ) {
+    public void addDestination(Node destination, int distance ) {
     	if (distance == 0) { 
     		//To_do Launch Exception (Distance between nodes cannot be 0 
     	}else {
-    		itinerariesFromCity.add(itinerary);
     		adjacentNodes.put(destination, distance);
     	}
     }
@@ -67,12 +64,5 @@ public class Node {
 		this.city = city;
 	}
 
-	public List<Itinerary> getItinerariesFromCity() {
-		return itinerariesFromCity;
-	}
-
-	public void setItinerariesFromCity(List<Itinerary> itinerariesFromCity) {
-		this.itinerariesFromCity = itinerariesFromCity;
-	}
 
 }

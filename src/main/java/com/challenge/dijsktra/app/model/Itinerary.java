@@ -1,4 +1,4 @@
-package com.challenge.dijsktra.app;
+package com.challenge.dijsktra.app.model;
 
 import java.time.LocalTime;
 

@@ -17,6 +17,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import com.challenge.dijsktra.app.algorithm.*;
+import com.challenge.dijsktra.app.model.City;
+import com.challenge.dijsktra.app.model.CityRepository;
+import com.challenge.dijsktra.app.model.Itinerary;
+import com.challenge.dijsktra.app.model.ItineraryRepository;
 
 @SpringBootApplication
 public class SpringBootChallengeDijsktraApplication {
@@ -26,7 +30,7 @@ public class SpringBootChallengeDijsktraApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootChallengeDijsktraApplication.class, args);
 	}
-
+/*
 	@Bean
 	public CommandLineRunner demo(CityRepository repository, ItineraryRepository itRepository) {
 		return (args) -> {
@@ -66,8 +70,8 @@ public class SpringBootChallengeDijsktraApplication {
 			log.info("--------------------------------------------");
 			City bauer = repository.findByName("Berlin");
 			bauer.toString();
-
-			// Save a few itineraries
+			*/
+			/*// Save a few itineraries
 			itRepository.save(new Itinerary(madrid, berlin, LocalTime.of(0, 0), LocalTime.of(1, 0)));
 			itRepository.save(new Itinerary(madrid, paris, LocalTime.of(0, 0), LocalTime.of(2, 0)));
 			itRepository.save(new Itinerary(paris, londres, LocalTime.of(1, 0), LocalTime.of(3, 0)));
@@ -83,18 +87,20 @@ public class SpringBootChallengeDijsktraApplication {
 				log.info(itinerary.toString());
 			}
 			log.info("");
-
+			*/
 			// Creating ShortestTimeGraph (Cities + Itineraries)
 
 			// Filling Node List with Cities
-			List<Node> cityNodes = new ArrayList<Node>();
+			/*List<Node> cityNodes = new ArrayList<Node>();
 
 			for (City cityN : repository.findAll()) {
 				Node node = new Node(cityN);
 				cityNodes.add(node);
 				log.info(cityN.toString() + " Added to City Nodes");
-			}
+			}*/
 
+			/*
+			
 			// Searching for itineraries whose origin node is this city
 			Graph graph = new Graph();
 
@@ -117,7 +123,7 @@ public class SpringBootChallengeDijsktraApplication {
 						Integer distance = (int) duration.getSeconds();
 						log.info("Duration between " + origin.getName() + " and " + itinerary.getDestination().getName() + " is " + distance +" seconds.");
 
-						node.addDestination(destinationNode, distance, itinerary );
+						node.addDestination(destinationNode, distance);
 
 					} catch (NoSuchElementException ex) {
 						log.info("destination node not found in cityNodes");
@@ -127,8 +133,9 @@ public class SpringBootChallengeDijsktraApplication {
 				// Adding each node to the graph
 				graph.addNode(node);
 			}
-
+			*/
 			// Calculating shortest distance from each node
+			/*
 			Graph graphfromMadrid = Dijkstra.calculateShortestPathFromSource(graph, cityNodes.get(0));
 
 			for (Node node : graphfromMadrid.getNodes()) {
@@ -143,11 +150,7 @@ public class SpringBootChallengeDijsktraApplication {
 
 					break;
 				case "Tokyo":
-					/*log.info("Shortest Path from " + cityNodes.get(0).getCity().getName() + " to Tokyo: ");
-					node.getShortestPath().forEach(cityL -> {
-						log.info(cityL.getCity().getName());
-					});
-					*/
+					
 					City originCity = null;
 					City destinationCity = null;
 					for (int i = 0; i <= node.getShortestPath().size()-1; i++) {
@@ -165,25 +168,7 @@ public class SpringBootChallengeDijsktraApplication {
 												
 					}
 					
-					
-					
-					/*City originCity = null;
-					City destinationCity = null;
-					for (Node nodeP : node.getShortestPath()) {
-
-						Iterator<Node> it = node.getShortestPath().iterator();
-						
-						originCity = nodeP.getCity();
-						if (it.hasNext()) {
-							destinationCity = it.next().getCity();
-						}else {
-							destinationCity = repository.findByName("Tokyo");							
-						}
-						Itinerary itinerary = itRepository.findByOriginAndDestination(originCity,destinationCity);
-						log.info(originCity.getName() + " to " + destinationCity.getName() + " Itinerary: " + itinerary.toString() );
-												
-					}*/
-					
+										
 					break;
 				
 				case "New York":
@@ -213,5 +198,5 @@ public class SpringBootChallengeDijsktraApplication {
 			}
 
 		};
-	}
+	}*/
 }
