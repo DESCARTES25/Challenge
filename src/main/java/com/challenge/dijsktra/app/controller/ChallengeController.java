@@ -10,18 +10,26 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.challenge.dijsktra.app.SpringBootChallengeDijsktraApplication;
 import com.challenge.dijsktra.app.algorithm.Dijkstra;
 import com.challenge.dijsktra.app.algorithm.Graph;
 import com.challenge.dijsktra.app.algorithm.Node;
+import com.challenge.dijsktra.app.exceptions.ItinerariesWithNegativeTimeException;
+import com.challenge.dijsktra.app.exceptions.ItinerariesWithZeroTimeException;
+import com.challenge.dijsktra.app.exceptions.NoCitiesFoundException;
+import com.challenge.dijsktra.app.exceptions.NoOriginOrDestinationForCityFoundException;
+import com.challenge.dijsktra.app.exceptions.NoItinerariesFoundException;
 import com.challenge.dijsktra.app.model.City;
-import com.challenge.dijsktra.app.model.CityRepository;
 import com.challenge.dijsktra.app.model.Itinerary;
-import com.challenge.dijsktra.app.model.ItineraryRepository;
+import com.challenge.dijsktra.app.service.ICityService;
+import com.challenge.dijsktra.app.service.IItineraryService;
 
 @RestController
 public class ChallengeController {
@@ -29,122 +37,159 @@ public class ChallengeController {
 	private static final Logger log = LoggerFactory.getLogger(ChallengeController.class);
 
 	@Autowired
-	private CityRepository repository;
-
+	@Qualifier("com.challenge.dijkstra.app.service.CityService")
+	private ICityService cityService;
 	@Autowired
-	private ItineraryRepository itRepository;
+	@Qualifier("com.challenge.dijkstra.app.service.ItineraryService")
+	private IItineraryService itineraryService;
 
+	@GetMapping("/cities")
+	public void getCities() {
+		// Filling Cities and Itineraries with Database
+		fillDB();
+		// Get All the Cities in DB
+		// Fetch that all cities are destination or origin in at least one itinerary 
+		for (City city : cityService.findAll()) {
+			log.info(city.toString());
+		}
+
+	}
+	
+	@GetMapping("/itineraries")
+	public void getItineraries() {
+		// Filling Cities and Itineraries with Database
+		fillDB();
+		// Get All the Itineraries in DB
+		// Fetch that all itineraries are destination or origin in at least one itinerary 
+		for (Itinerary itinerary : itineraryService.findAll()) {
+			log.info(itinerary.toString());
+		}
+
+	}
+	
+	
+	
+	
 	@GetMapping("/shortesttime/from/{from}/to/{to}")
 	public void shortestTimeItinerary(@PathVariable String from, @PathVariable String to) {
 
-		// Filling Cities and Itineraries with Database
-		fillDB();
-
-		// Extracting origin and destination from the PathVariable
-		City origin = repository.findByName(from);
-
-		City destination = repository.findByName(to);
-
-		// Filling Graph Nodes with each City in DB
-		List<Node> cityNodes = fillCityNodes();
-
-		// Creating Graph to work out shortest time between cities
-		Graph graph = createGraph("T", cityNodes);
-
-		// Calculate the shortest graph from origin to each destination city
-		Graph graphFrom = calculateShortestTimeGraph(graph, cityNodes, origin);
-
-		// Prints Shortest Path Between Origin and Destination
-		printShortestTimeGraph(graphFrom, origin, destination);
+		// Calculate the shortest time for the path between "from" city and "to" city
+		calculateShortestPath("T", from, to);
 
 	}
 
 	@GetMapping("/shortestconnection/from/{from}/to/{to}")
 	public void shortestConnectionItinerary(@PathVariable String from, @PathVariable String to) {
+		// Calculate the shortest number of connections for the path between "from" city
+		// and "to" city
+		calculateShortestPath("C", from, to);
+
+	}
+
+	private void calculateShortestPath(String timeOrConnections, String from, String to) {
 
 		// Filling Cities and Itineraries with Database
 		fillDB();
+		// Validates the correctness of data before starting graph calculations
+		checkDataErrors();
 
 		// Extracting origin and destination from the PathVariable
-		City origin = repository.findByName(from);
-
-		City destination = repository.findByName(to);
+		City origin = null;
+		City destination = null;
+		origin = cityService.findByName(from);
+		destination = cityService.findByName(to);
 
 		// Filling Graph Nodes with each City in DB
 		List<Node> cityNodes = fillCityNodes();
 
 		// Creating Graph to work out shortest time between cities
-		Graph graph = createGraph("C", cityNodes);
+		Graph graph = createGraph(timeOrConnections, cityNodes);
 
 		// Calculate the shortest graph from origin to each destination city
 		Graph graphFrom = calculateShortestTimeGraph(graph, cityNodes, origin);
 
 		// Prints Shortest Path Between Origin and Destination
-		printShortestTimeGraph(graphFrom, origin, destination);
+		printShortestGraph(graphFrom, origin, destination);
+
 	}
 
 	private void fillDB() {
 
-		// Control if the DB is already filled
-
-		if (repository.count() == 0 && itRepository.count() == 0) {
+		// Control if the DB is already filled, avoiding to fill the database several times
+		if (cityService.count() == 0 && itineraryService.count() == 0) {
 
 			// Save a few cities
-
+			
 			City madrid = new City("Madrid");
-			City londres = new City("Londres");
+			City london = new City("London");
 			City berlin = new City("Berlin");
 			City tokyo = new City("Tokyo");
 			City paris = new City("Paris");
 			City newYork = new City("New York");
 
-			repository.save(madrid);
-			repository.save(londres);
-			repository.save(berlin);
-			repository.save(tokyo);
-			repository.save(paris);
-			repository.save(newYork);
-
-			// Fetch all cities
-			log.info("Cities found with findAll():");
-			log.info("-------------------------------");
-			for (City city : repository.findAll()) {
-				log.info(city.toString());
-			}
-			log.info("");
-
-			// Fetch an individual city by ID
-			City city = repository.findById(4L);
-			log.info("City found with findById(4L):");
-			log.info("--------------------------------");
-			log.info(city.toString());
-			log.info("");
-
-			// Fetch cities by name
-			log.info("City found with findByLastName('Berlin'):");
-			log.info("--------------------------------------------");
-			City bauer = repository.findByName("Berlin");
-			bauer.toString();
+			cityService.save(madrid);
+			cityService.save(london);
+			cityService.save(berlin);
+			cityService.save(tokyo);
+			cityService.save(paris);
+			cityService.save(newYork);
+			
+			
 
 			// Save a few itineraries
-			itRepository.save(new Itinerary(madrid, berlin, LocalTime.of(0, 0), LocalTime.of(1, 0)));
-			itRepository.save(new Itinerary(madrid, paris, LocalTime.of(0, 0), LocalTime.of(2, 0)));
-			itRepository.save(new Itinerary(paris, londres, LocalTime.of(1, 0), LocalTime.of(3, 0)));
-			itRepository.save(new Itinerary(paris, newYork, LocalTime.of(1, 0), LocalTime.of(5, 0)));
-			itRepository.save(new Itinerary(berlin, tokyo, LocalTime.of(6, 0), LocalTime.of(7, 0)));
-			itRepository.save(new Itinerary(londres, tokyo, LocalTime.of(10, 0), LocalTime.of(12, 0)));
-			itRepository.save(new Itinerary(newYork, tokyo, LocalTime.of(15, 0), LocalTime.of(20, 0)));
+			itineraryService.save(new Itinerary(madrid, berlin, LocalTime.of(0, 0), LocalTime.of(1, 0)));
+			itineraryService.save(new Itinerary(madrid, paris, LocalTime.of(0, 0), LocalTime.of(2, 0)));
+			itineraryService.save(new Itinerary(paris, london, LocalTime.of(1, 0), LocalTime.of(3, 0)));
+			itineraryService.save(new Itinerary(paris, newYork, LocalTime.of(1, 0), LocalTime.of(5, 0)));
+			itineraryService.save(new Itinerary(berlin, tokyo, LocalTime.of(6, 0), LocalTime.of(7, 0)));
+			itineraryService.save(new Itinerary(london, tokyo, LocalTime.of(10, 0), LocalTime.of(12, 0)));
+			itineraryService.save(new Itinerary(newYork, tokyo, LocalTime.of(15, 0), LocalTime.of(20, 0)));
 
-			// Fetch all itineraries
-			log.info("Cities found with findAll():");
-			log.info("-------------------------------");
-			for (Itinerary itinerary : itRepository.findAll()) {
-				log.info(itinerary.toString());
-			}
-			log.info("");
+			
 
 		}
 
+	}
+
+	private void checkDataErrors() {
+
+		//Checks cities are filled
+		if (cityService.count() == 0) {
+			throw new NoCitiesFoundException();
+		}
+		
+		//Checks itineraries are filled
+		if (itineraryService.count() == 0) {
+			throw new NoItinerariesFoundException();
+		}
+		
+		//Checks Itinerary with no time between departure and arrival
+		Itinerary itineraryZero = itineraryService.existItinerariesWithZerotime();
+		if (itineraryZero != null) {
+			throw new ItinerariesWithZeroTimeException(itineraryZero);
+		}
+		
+		//Checks Itinerary with no time between departure and arrival
+		Itinerary itineraryNegative = itineraryService.existItinerariesWithZerotime();
+		if (itineraryNegative != null) {
+			throw new ItinerariesWithNegativeTimeException(itineraryNegative);
+		}
+					
+		// Fetch that all cities are destination or origin in at least one itinerary 
+		for (City city : cityService.findAll()) {
+			log.info(city.toString());
+			
+			List<Itinerary> originItineraries = itineraryService.findByOrigin(city);
+			List<Itinerary> destinationItineraries = itineraryService.findByDestination(city);
+			if (originItineraries.isEmpty() && destinationItineraries.isEmpty()) {
+				throw new NoOriginOrDestinationForCityFoundException(city);				
+			}
+			
+		}
+	
+		
+		
+		
 	}
 
 	private List<Node> fillCityNodes() {
@@ -152,7 +197,7 @@ public class ChallengeController {
 		// Filling Node List with Cities
 		List<Node> cityNodes = new ArrayList<Node>();
 
-		for (City cityN : repository.findAll()) {
+		for (City cityN : cityService.findAll()) {
 			Node node = new Node(cityN);
 			cityNodes.add(node);
 			log.info(cityN.toString() + " Added to City Nodes");
@@ -171,7 +216,7 @@ public class ChallengeController {
 		for (Node node : cityNodes) {
 			City origin = node.getCity();
 			// Searching for itineraries whose origin node is this city
-			List<Itinerary> cityItineraries = itRepository.findByOrigin(origin);
+			List<Itinerary> cityItineraries = itineraryService.findByOrigin(origin);
 			for (Itinerary itinerary : cityItineraries) {
 
 				Optional<Node> opDestinationNode = cityNodes.stream()
@@ -233,7 +278,7 @@ public class ChallengeController {
 		return graphFrom;
 	}
 
-	private void printShortestTimeGraph(Graph graphFrom, City origin, City endDestination) {
+	private void printShortestGraph(Graph graphFrom, City origin, City endDestination) {
 
 		// Searching for Destination City in
 		for (Node node : graphFrom.getNodes()) {
@@ -251,7 +296,7 @@ public class ChallengeController {
 						destinationCity = node.getShortestPath().get(i + 1).getCity();
 
 					}
-					Itinerary itinerary = itRepository.findByOriginAndDestination(originCity, destinationCity);
+					Itinerary itinerary = itineraryService.findByOriginAndDestination(originCity, destinationCity);
 					log.info(originCity.getName() + " to " + destinationCity.getName() + " Itinerary: "
 							+ itinerary.toString());
 

@@ -3,6 +3,7 @@ package com.challenge.dijsktra.app;
 
 
 import com.challenge.dijsktra.app.algorithm.*;
+import com.challenge.dijsktra.app.model.City;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,16 +14,16 @@ import org.junit.jupiter.api.Test;
 
 
 public class DijkstraAlgorithmLongRunningUnitTest {
-/*
+
     @Test
     public void whenDijkstra_HappyPathShortestTime() {
     		
-        Node nodeA = new Node("A");
-        Node nodeB = new Node("B");
-        Node nodeC = new Node("C");
-        Node nodeD = new Node("D");
-        Node nodeE = new Node("E");
-        Node nodeF = new Node("F");
+        Node nodeA = new Node(new City("A"));
+        Node nodeB = new Node(new City("B"));
+        Node nodeC = new Node(new City("C"));
+        Node nodeD = new Node(new City("D"));
+        Node nodeE = new Node(new City("E"));
+        Node nodeF = new Node(new City("F"));
 
         nodeA.addDestination(nodeB, 10);        
         nodeA.addDestination(nodeC, 15);
@@ -55,7 +56,7 @@ public class DijkstraAlgorithmLongRunningUnitTest {
         List<Node> shortestPathForNodeF = Arrays.asList(nodeA, nodeB, nodeD);
 
         for (Node node : graph.getNodes()) {
-            switch (node.getName()) {
+            switch (node.getCity().getName()) {
             case "B":
                 assertTrue(node
                   .getShortestPath()
@@ -88,12 +89,12 @@ public class DijkstraAlgorithmLongRunningUnitTest {
     @Test
     public void whenGraphCycle_Ignore() {
 
-        Node nodeA = new Node("A");
-        Node nodeB = new Node("B");
-        Node nodeC = new Node("C");
-        Node nodeD = new Node("D");
-        Node nodeE = new Node("E");
-        Node nodeF = new Node("F");
+        Node nodeA = new Node(new City("A"));
+        Node nodeB = new Node(new City("B"));
+        Node nodeC = new Node(new City("C"));
+        Node nodeD = new Node(new City("D"));
+        Node nodeE = new Node(new City("E"));
+        Node nodeF = new Node(new City("F"));
 
         nodeA.addDestination(nodeB, 10);
         //Graph Cycle
@@ -132,7 +133,7 @@ public class DijkstraAlgorithmLongRunningUnitTest {
         List<Node> shortestPathForNodeF = Arrays.asList(nodeA, nodeB, nodeD);
 
         for (Node node : graph.getNodes()) {
-            switch (node.getName()) {
+            switch (node.getCity().getName()) {
             case "B":
                 assertTrue(node
                   .getShortestPath()
@@ -161,28 +162,16 @@ public class DijkstraAlgorithmLongRunningUnitTest {
             }
         }
     }
-*/
-    @Test
-    public void whenZeroDistance() {
 
-        /*Node nodeA = new Node("A");
-        Node nodeB = new Node("B");
-        
-        nodeA.addDestination(nodeB, 0);
-        */
-        
-               
-    }
-/*
     @Test
     public void whenDijkstra_HappyPathConnections() {
 
-        Node nodeA = new Node("A");
-        Node nodeB = new Node("B");
-        Node nodeC = new Node("C");
-        Node nodeD = new Node("D");
-        Node nodeE = new Node("E");
-        Node nodeF = new Node("F");
+        Node nodeA = new Node(new City("A"));
+        Node nodeB = new Node(new City("B"));
+        Node nodeC = new Node(new City("C"));
+        Node nodeD = new Node(new City("D"));
+        Node nodeE = new Node(new City("E"));
+        Node nodeF = new Node(new City("F"));
 
         nodeA.addDestination(nodeB, 1);
         nodeB.addDestination(nodeA, 1);
@@ -217,7 +206,7 @@ public class DijkstraAlgorithmLongRunningUnitTest {
         List<Node> shortestPathForNodeF = Arrays.asList(nodeA, nodeB);
 
         for (Node node : graph.getNodes()) {
-            switch (node.getName()) {
+            switch (node.getCity().getName()) {
             case "B":
                 assertTrue(node
                   .getShortestPath()
@@ -245,7 +234,7 @@ public class DijkstraAlgorithmLongRunningUnitTest {
                 break;
             }
         }
-    }*/
+    }
 
 
     

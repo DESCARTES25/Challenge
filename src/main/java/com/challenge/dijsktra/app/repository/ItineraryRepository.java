@@ -1,8 +1,12 @@
-package com.challenge.dijsktra.app.model;
+package com.challenge.dijsktra.app.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
+
+import com.challenge.dijsktra.app.model.City;
+import com.challenge.dijsktra.app.model.Itinerary;
 
 public interface ItineraryRepository extends CrudRepository<Itinerary, Long> {
 
@@ -22,5 +26,5 @@ public interface ItineraryRepository extends CrudRepository<Itinerary, Long> {
   Itinerary findByOriginAndDestination(City origin, City destination);
   
   //Returns a Itinerary by its Id
-  Itinerary findById(long id);
+  Optional<Itinerary> findById(long id);
 }

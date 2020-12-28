@@ -18,9 +18,9 @@ import org.springframework.context.annotation.Bean;
 
 import com.challenge.dijsktra.app.algorithm.*;
 import com.challenge.dijsktra.app.model.City;
-import com.challenge.dijsktra.app.model.CityRepository;
 import com.challenge.dijsktra.app.model.Itinerary;
-import com.challenge.dijsktra.app.model.ItineraryRepository;
+import com.challenge.dijsktra.app.repository.CityRepository;
+import com.challenge.dijsktra.app.repository.ItineraryRepository;
 
 @SpringBootApplication
 public class SpringBootChallengeDijsktraApplication {
