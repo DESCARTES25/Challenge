@@ -12,9 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.challenge.dijsktra.app.SpringBootChallengeDijsktraApplication;
@@ -45,6 +47,22 @@ public class ChallengeController {
 
 	@GetMapping("/cities")
 	public List<City> getCities() {
+		
+		/*ResponseEntity<CurrencyConversionBean> responseEntity = 
+				   new RestTemplate().getForEntity(
+				        "http://localhost:8091/cities", CurrencyConversionBean.class,  uriVariables);*/
+		
+		
+		
+	/*	RestTemplate restTemplate = new RestTemplate();
+		String apiResourceUrl
+		  = "http://localhost:8082";
+		ResponseEntity<String> response
+		  = restTemplate.getForEntity(apiResourceUrl + "/cities" , String.class);
+		assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+	*/	
+		
+		
 		// Filling Cities and Itineraries with Database
 		fillDB();
 		// Get All the Cities in DB

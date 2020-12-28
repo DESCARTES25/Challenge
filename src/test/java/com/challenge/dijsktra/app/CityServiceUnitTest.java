@@ -73,7 +73,6 @@ public class CityServiceUnitTest {
 		
 		String myCityName = "Split";
 
-		cityService.findAll();
 		try {
 			cityService.findByName(myCityName);
 		} catch (Exception ex) {
@@ -103,7 +102,6 @@ public class CityServiceUnitTest {
 			Assertions.assertEquals(ex.getMessage(), "City with name " + london.getName() + " is already in the database");
 		}
 		
-		cityService.findAll();
 
 	}
 
