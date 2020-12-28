@@ -44,49 +44,46 @@ public class ChallengeController {
 	private IItineraryService itineraryService;
 
 	@GetMapping("/cities")
-	public void getCities() {
+	public List<City> getCities() {
 		// Filling Cities and Itineraries with Database
 		fillDB();
 		// Get All the Cities in DB
-		// Fetch that all cities are destination or origin in at least one itinerary 
-		for (City city : cityService.findAll()) {
-			log.info(city.toString());
-		}
+		// Fetch that all cities are destination or origin in at least one itinerary
+		/*
+		 * for (City city : cityService.findAll()) { log.info(city.toString()); }
+		 */
+		return cityService.findAll();
 
 	}
-	
+
 	@GetMapping("/itineraries")
-	public void getItineraries() {
+	public List<Itinerary> getItineraries() {
 		// Filling Cities and Itineraries with Database
 		fillDB();
 		// Get All the Itineraries in DB
-		// Fetch that all itineraries are destination or origin in at least one itinerary 
-		for (Itinerary itinerary : itineraryService.findAll()) {
-			log.info(itinerary.toString());
-		}
+		// Fetch that all itineraries are destination or origin in at least one
+		// itinerary
+		return itineraryService.findAll();
 
 	}
-	
-	
-	
-	
+
 	@GetMapping("/shortesttime/from/{from}/to/{to}")
-	public void shortestTimeItinerary(@PathVariable String from, @PathVariable String to) {
+	public List<Itinerary> shortestTimeItinerary(@PathVariable String from, @PathVariable String to) {
 
 		// Calculate the shortest time for the path between "from" city and "to" city
-		calculateShortestPath("T", from, to);
+		return calculateShortestPath("T", from, to);
 
 	}
 
 	@GetMapping("/shortestconnection/from/{from}/to/{to}")
-	public void shortestConnectionItinerary(@PathVariable String from, @PathVariable String to) {
+	public List<Itinerary> shortestConnectionItinerary(@PathVariable String from, @PathVariable String to) {
 		// Calculate the shortest number of connections for the path between "from" city
 		// and "to" city
-		calculateShortestPath("C", from, to);
+		return calculateShortestPath("C", from, to);
 
 	}
 
-	private void calculateShortestPath(String timeOrConnections, String from, String to) {
+	private List<Itinerary> calculateShortestPath(String timeOrConnections, String from, String to) {
 
 		// Filling Cities and Itineraries with Database
 		fillDB();
@@ -109,17 +106,18 @@ public class ChallengeController {
 		Graph graphFrom = calculateShortestTimeGraph(graph, cityNodes, origin);
 
 		// Prints Shortest Path Between Origin and Destination
-		printShortestGraph(graphFrom, origin, destination);
+		return printShortestGraph(graphFrom, origin, destination);
 
 	}
 
 	private void fillDB() {
 
-		// Control if the DB is already filled, avoiding to fill the database several times
+		// Control if the DB is already filled, avoiding to fill the database several
+		// times
 		if (cityService.count() == 0 && itineraryService.count() == 0) {
 
 			// Save a few cities
-			
+
 			City madrid = new City("Madrid");
 			City london = new City("London");
 			City berlin = new City("Berlin");
@@ -133,8 +131,6 @@ public class ChallengeController {
 			cityService.save(tokyo);
 			cityService.save(paris);
 			cityService.save(newYork);
-			
-			
 
 			// Save a few itineraries
 			itineraryService.save(new Itinerary(madrid, berlin, LocalTime.of(0, 0), LocalTime.of(1, 0)));
@@ -145,51 +141,46 @@ public class ChallengeController {
 			itineraryService.save(new Itinerary(london, tokyo, LocalTime.of(10, 0), LocalTime.of(12, 0)));
 			itineraryService.save(new Itinerary(newYork, tokyo, LocalTime.of(15, 0), LocalTime.of(20, 0)));
 
-			
-
 		}
 
 	}
 
 	private void checkDataErrors() {
 
-		//Checks cities are filled
+		// Checks cities are filled
 		if (cityService.count() == 0) {
 			throw new NoCitiesFoundException();
 		}
-		
-		//Checks itineraries are filled
+
+		// Checks itineraries are filled
 		if (itineraryService.count() == 0) {
 			throw new NoItinerariesFoundException();
 		}
-		
-		//Checks Itinerary with no time between departure and arrival
+
+		// Checks Itinerary with no time between departure and arrival
 		Itinerary itineraryZero = itineraryService.existItinerariesWithZerotime();
 		if (itineraryZero != null) {
 			throw new ItinerariesWithZeroTimeException(itineraryZero);
 		}
-		
-		//Checks Itinerary with no time between departure and arrival
+
+		// Checks Itinerary with no time between departure and arrival
 		Itinerary itineraryNegative = itineraryService.existItinerariesWithZerotime();
 		if (itineraryNegative != null) {
 			throw new ItinerariesWithNegativeTimeException(itineraryNegative);
 		}
-					
-		// Fetch that all cities are destination or origin in at least one itinerary 
+
+		// Fetch that all cities are destination or origin in at least one itinerary
 		for (City city : cityService.findAll()) {
 			log.info(city.toString());
-			
+
 			List<Itinerary> originItineraries = itineraryService.findByOrigin(city);
 			List<Itinerary> destinationItineraries = itineraryService.findByDestination(city);
 			if (originItineraries.isEmpty() && destinationItineraries.isEmpty()) {
-				throw new NoOriginOrDestinationForCityFoundException(city);				
+				throw new NoOriginOrDestinationForCityFoundException(city);
 			}
-			
+
 		}
-	
-		
-		
-		
+
 	}
 
 	private List<Node> fillCityNodes() {
@@ -278,8 +269,8 @@ public class ChallengeController {
 		return graphFrom;
 	}
 
-	private void printShortestGraph(Graph graphFrom, City origin, City endDestination) {
-
+	private List<Itinerary> printShortestGraph(Graph graphFrom, City origin, City endDestination) {
+		List<Itinerary> shortestPath = new ArrayList<Itinerary>();
 		// Searching for Destination City in
 		for (Node node : graphFrom.getNodes()) {
 			if (node.getCity().getName().equals(endDestination.getName())) {
@@ -297,14 +288,16 @@ public class ChallengeController {
 
 					}
 					Itinerary itinerary = itineraryService.findByOriginAndDestination(originCity, destinationCity);
-					log.info(originCity.getName() + " to " + destinationCity.getName() + " Itinerary: "
-							+ itinerary.toString());
+					shortestPath.add(itinerary);
+					/*log.info(originCity.getName() + " to " + destinationCity.getName() + " Itinerary: "
+							+ itinerary.toString());*/
 
 				}
 
 			}
 
 		}
+		return shortestPath;
 
 	}
 
