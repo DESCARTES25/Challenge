@@ -3,11 +3,14 @@ package com.challenge.dijsktra.app.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 import com.challenge.dijsktra.app.model.City;
 import com.challenge.dijsktra.app.model.Itinerary;
 
+@Repository
 public interface ItineraryRepository extends CrudRepository<Itinerary, Long> {
 
   //Counting Itineraries in the DB

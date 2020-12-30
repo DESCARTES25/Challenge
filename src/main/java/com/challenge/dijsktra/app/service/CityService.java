@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 import com.challenge.dijsktra.app.exceptions.CityNotFoundException;
 import com.challenge.dijsktra.app.exceptions.DuplicateCityException;
 import com.challenge.dijsktra.app.exceptions.NoCitiesFoundException;
-import com.challenge.dijsktra.app.exceptions.NoItinerariesFoundException;
 import com.challenge.dijsktra.app.model.City;
-import com.challenge.dijsktra.app.model.Itinerary;
 import com.challenge.dijsktra.app.repository.CityRepository;
 
 

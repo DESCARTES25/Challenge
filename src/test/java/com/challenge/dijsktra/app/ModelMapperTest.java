@@ -1,5 +1,6 @@
 package com.challenge.dijsktra.app;
 
+import com.challenge.dijsktra.app.DTOs.CityDTO;
 import com.challenge.dijsktra.app.algorithm.*;
 import com.challenge.dijsktra.app.model.City;
 
@@ -13,30 +14,28 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-public class ApiConnectionTest {
-
-	private URL base;
-	private TestRestTemplate template;
-
+public class ModelMapperTest {
 	
 
-	@Test
-	public void testingAPIConnection() {
-		try {
-			this.base = new URL("http://localhost:8082");
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		template = new TestRestTemplate();
-		ResponseEntity<String> response = template.getForEntity(base + "/api/cities", String.class);
-		assertEquals(response.getStatusCode(), HttpStatus.OK);
+    private ModelMapper modelMapper = new ModelMapper();
 
-	}
+
+
+    @Test
+    public void whenConvertPostDtoToPostEntity_thenCorrect() {
+        CityDTO madridDto = new CityDTO("Madrid");
+        long id = 2;
+        madridDto.setId(id);
+        City madrid = modelMapper.map(madridDto, City.class);
+   //     assertEquals(madridDto.getId(), madrid.getId());
+        assertEquals(madridDto.getName(), madrid.getName());
+    }
+
 
 }

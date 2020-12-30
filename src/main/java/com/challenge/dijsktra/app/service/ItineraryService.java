@@ -7,15 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.challenge.dijsktra.app.exceptions.CityNotFoundException;
 import com.challenge.dijsktra.app.exceptions.ItineraryNotFoundException;
 import com.challenge.dijsktra.app.exceptions.NoItinerariesFoundException;
 import com.challenge.dijsktra.app.exceptions.RepeatedItinerariesFoundException;
 import com.challenge.dijsktra.app.model.City;
 import com.challenge.dijsktra.app.model.Itinerary;
-import com.challenge.dijsktra.app.repository.CityRepository;
 import com.challenge.dijsktra.app.repository.ItineraryRepository;
-
 @Service
 @Qualifier("com.challenge.dijkstra.app.service.ItineraryService")
 public class ItineraryService implements IItineraryService {

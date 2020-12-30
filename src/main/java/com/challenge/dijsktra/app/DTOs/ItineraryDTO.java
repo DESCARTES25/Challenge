@@ -1,4 +1,4 @@
-package com.challenge.dijsktra.app.model;
+package com.challenge.dijsktra.app.DTOs;
 
 import java.time.LocalTime;
 
@@ -11,27 +11,21 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Entity
-@Table( name = "itineraries",
-uniqueConstraints = { @UniqueConstraint( columnNames = { "origin_id", "destination_id" } ) } )
-public class Itinerary {
+public class ItineraryDTO {
 
-	@Id
-	/*@GeneratedValue(strategy = GenerationType.AUTO)*/
+
 	private Long id;
-	@OneToOne
-    @JoinColumn(name = "origin_id")
-    private City origin;
-	@OneToOne
-    @JoinColumn(name = "destination_id")
-	private City destination;
+
+    private CityDTO origin;
+
+	private CityDTO destination;
 	private LocalTime departure;
 	private LocalTime arrival;
 
-	protected Itinerary() {
+	protected ItineraryDTO() {
 	}
 
-	public Itinerary(City origin, City destination, LocalTime departure, LocalTime arrival) {
+	public ItineraryDTO(CityDTO origin, CityDTO destination, LocalTime departure, LocalTime arrival) {
 		this.setOrigin(origin);
 		this.setDestination(destination);
 		this.setDeparture(departure);
@@ -47,24 +41,20 @@ public class Itinerary {
 	public Long getId() {
 		return id;
 	}
-	
-	public void setId(Long id) {
-		this.id = id;
-	}
 
-	public City getOrigin() {
+	public CityDTO getOrigin() {
 		return origin;
 	}
 
-	public void setOrigin(City origin) {
+	public void setOrigin(CityDTO origin) {
 		this.origin = origin;
 	}
 
-	public City getDestination() {
+	public CityDTO getDestination() {
 		return destination;
 	}
 
-	public void setDestination(City destination) {
+	public void setDestination(CityDTO destination) {
 		this.destination = destination;
 	}
 

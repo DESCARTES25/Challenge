@@ -3,10 +3,13 @@ package com.challenge.dijsktra.app.controller;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+
 import com.challenge.dijsktra.app.SpringBootChallengeDijsktraApplication;
+import com.challenge.dijsktra.app.DTOs.CityDTO;
+import com.challenge.dijsktra.app.DTOs.ItineraryDTO;
 import com.challenge.dijsktra.app.algorithm.Dijkstra;
 import com.challenge.dijsktra.app.algorithm.Graph;
 import com.challenge.dijsktra.app.algorithm.Node;
@@ -37,7 +43,7 @@ import com.challenge.dijsktra.app.service.IItineraryService;
 public class ChallengeController {
 
 	private static final Logger log = LoggerFactory.getLogger(ChallengeController.class);
-
+	
 	@Autowired
 	@Qualifier("com.challenge.dijkstra.app.service.CityService")
 	private ICityService cityService;
@@ -46,44 +52,19 @@ public class ChallengeController {
 	private IItineraryService itineraryService;
 
 	@GetMapping("/cities")
-	public List<City> getCities() {
-		
-		/*ResponseEntity<CurrencyConversionBean> responseEntity = 
-				   new RestTemplate().getForEntity(
-				        "http://localhost:8091/cities", CurrencyConversionBean.class,  uriVariables);*/
-		
-		
-		
-	/*	RestTemplate restTemplate = new RestTemplate();
-		String apiResourceUrl
-		  = "http://localhost:8082";
-		ResponseEntity<String> response
-		  = restTemplate.getForEntity(apiResourceUrl + "/cities" , String.class);
-		assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
-	*/	
-		
-		
-		// Filling Cities and Itineraries with Database
-		fillDB();
-		// Get All the Cities in DB
-		// Fetch that all cities are destination or origin in at least one itinerary
-		/*
-		 * for (City city : cityService.findAll()) { log.info(city.toString()); }
-		 */
-		return cityService.findAll();
+	public List<CityDTO> getCities() {
+
+		return getCitiesFromRestDBApi();
 
 	}
-
+	
 	@GetMapping("/itineraries")
-	public List<Itinerary> getItineraries() {
-		// Filling Cities and Itineraries with Database
-		fillDB();
-		// Get All the Itineraries in DB
-		// Fetch that all itineraries are destination or origin in at least one
-		// itinerary
-		return itineraryService.findAll();
+	public List<ItineraryDTO> getItineraries() {
+
+		return getItinerariesFromRestDBApi();
 
 	}
+
 
 	@GetMapping("/shortesttime/from/{from}/to/{to}")
 	public List<Itinerary> shortestTimeItinerary(@PathVariable String from, @PathVariable String to) {
@@ -101,10 +82,32 @@ public class ChallengeController {
 
 	}
 
+	private List<CityDTO> getCitiesFromRestDBApi() {
+
+		RestTemplate restTemplate = new RestTemplate();
+		List<CityDTO> cities = Arrays
+				.stream(restTemplate.getForObject("http://localhost:8082/api/cities", CityDTO[].class))
+				.collect(Collectors.toList());
+
+		return cities;
+
+	}
+	
+	private List<ItineraryDTO> getItinerariesFromRestDBApi() {
+
+		RestTemplate restTemplate = new RestTemplate();
+		List<ItineraryDTO> itineraries = Arrays
+				.stream(restTemplate.getForObject("http://localhost:8082/api/itineraries", ItineraryDTO[].class))
+				.collect(Collectors.toList());
+
+		return itineraries;
+		 
+	}
+
 	private List<Itinerary> calculateShortestPath(String timeOrConnections, String from, String to) {
 
-		// Filling Cities and Itineraries with Database
-		fillDB();
+		// Filling Cities and Itineraries from Database API
+		fillDataFromDBRestApi();
 		// Validates the correctness of data before starting graph calculations
 		checkDataErrors();
 
@@ -128,37 +131,32 @@ public class ChallengeController {
 
 	}
 
-	private void fillDB() {
+	private void fillDataFromDBRestApi() {
 
-		// Control if the DB is already filled, avoiding to fill the database several
+		// Control if the Data is already filled, avoiding to fill the database several
 		// times
 		if (cityService.count() == 0 && itineraryService.count() == 0) {
 
-			// Save a few cities
+			//Mapping DTO -> Entity and saving it
+			//Getting Cities
+			ModelMapper modelMapper = new ModelMapper();
+			
+			List<CityDTO> citiesDB = getCitiesFromRestDBApi();
 
-			City madrid = new City("Madrid");
-			City london = new City("London");
-			City berlin = new City("Berlin");
-			City tokyo = new City("Tokyo");
-			City paris = new City("Paris");
-			City newYork = new City("New York");
+			for (CityDTO cityDB : citiesDB) {
+				City city = modelMapper.map(cityDB, City.class);
+				cityService.save(city);
+			}
+			
+			//Getting Itineraries
+			List<ItineraryDTO> itinerariesDB = getItinerariesFromRestDBApi();
 
-			cityService.save(madrid);
-			cityService.save(london);
-			cityService.save(berlin);
-			cityService.save(tokyo);
-			cityService.save(paris);
-			cityService.save(newYork);
-
-			// Save a few itineraries
-			itineraryService.save(new Itinerary(madrid, berlin, LocalTime.of(0, 0), LocalTime.of(1, 0)));
-			itineraryService.save(new Itinerary(madrid, paris, LocalTime.of(0, 0), LocalTime.of(2, 0)));
-			itineraryService.save(new Itinerary(paris, london, LocalTime.of(1, 0), LocalTime.of(3, 0)));
-			itineraryService.save(new Itinerary(paris, newYork, LocalTime.of(1, 0), LocalTime.of(5, 0)));
-			itineraryService.save(new Itinerary(berlin, tokyo, LocalTime.of(6, 0), LocalTime.of(7, 0)));
-			itineraryService.save(new Itinerary(london, tokyo, LocalTime.of(10, 0), LocalTime.of(12, 0)));
-			itineraryService.save(new Itinerary(newYork, tokyo, LocalTime.of(15, 0), LocalTime.of(20, 0)));
-
+			for (ItineraryDTO itineraryDB : itinerariesDB) {
+				Itinerary itinerary = modelMapper.map(itineraryDB, Itinerary.class);
+				itineraryService.save(itinerary);
+			}
+			
+			
 		}
 
 	}
@@ -307,8 +305,10 @@ public class ChallengeController {
 					}
 					Itinerary itinerary = itineraryService.findByOriginAndDestination(originCity, destinationCity);
 					shortestPath.add(itinerary);
-					/*log.info(originCity.getName() + " to " + destinationCity.getName() + " Itinerary: "
-							+ itinerary.toString());*/
+					/*
+					 * log.info(originCity.getName() + " to " + destinationCity.getName() +
+					 * " Itinerary: " + itinerary.toString());
+					 */
 
 				}
 
